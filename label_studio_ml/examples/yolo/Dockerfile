@@ -100,6 +100,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libsm6 \
         libxext6 \
         python3 \
+        ca-certificates \
     && rm -rf /usr/share/doc/* \
     && rm -rf /usr/share/man/* \
     && rm -rf /usr/share/lintian/*
