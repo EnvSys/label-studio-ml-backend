@@ -3,4 +3,4 @@ tqdm
 torchmetrics<1.8.0
 numpy<2
 lap==0.5.12
-
+shapely==2.1.2

@@ -1,8 +1,16 @@
+"""NOTE: Changes made to support the use-case for a custom yolo segmentation model that was
+fine-tuned on images of the environment. Resulting segmentation masks were too complex and sometimes
+invalid. A function that ensures polygons are valid with a reduction in polygon complexity has been
+added.
+"""
 import logging
+import os
+
+from typing import List, Dict
+from shapely import Polygon
+import numpy as np
 
 from control_models.base import ControlModel
-from typing import List, Dict
-
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +21,8 @@ class PolygonLabelsModel(ControlModel):
     """
 
     type = "PolygonLabels"
-    model_path = "yolov8n-seg.pt"
+    # changes made to avoid hardcoding of model path
+    model_path = os.getenv("POLYGON_LABELS_MODEL_PATH", "yolov8n-seg.pt")
 
     @classmethod
     def is_control_matched(cls, control) -> bool:
@@ -37,6 +46,7 @@ class PolygonLabelsModel(ControlModel):
             points = (
                 data.xyn[i] * 100
             )  # get the polygon points for the current instance
+            points = ensure_valid_polys(points)
             model_label = model_names[int(results[0].boxes.cls[i])]
 
             logger.debug(
@@ -72,6 +82,21 @@ class PolygonLabelsModel(ControlModel):
             regions.append(region)
         return regions
 
+def ensure_valid_polys(points):
+    """Envsys specific Fix for invalid polygons and to reduce the number of points
+
+    :param points: np.array, polygon point coordinates xyn format
+    :return: np.array, simplified polygon coordinates
+    """
+    poly = Polygon(points)
+    if not poly.is_valid:
+        poly = poly.buffer(0)
+        if poly.geom_type == "MultiPolygon":
+            poly = max(poly.geoms, key=lambda p: p.area) # see if it is better to union them
+
+    poly = poly.simplify(0.5, preserve_topology=True)
+
+    return np.array(poly.exterior.coords)
 
 # pre-load and cache default model at startup
 PolygonLabelsModel.get_cached_model(PolygonLabelsModel.model_path)
