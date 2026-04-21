@@ -46,7 +46,7 @@ services:
       # Model root directory, where the YOLO model files are stored
       - MODEL_ROOT=/app/models
     extra_hosts:
-      - "host.docker.internal:172.17.0.1"  # for macos and unix
+      - "host.docker.internal:host-gateway"  # for macos and unix
     ports:
       - "9090:9090"
     volumes:
