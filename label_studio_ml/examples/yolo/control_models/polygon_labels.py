@@ -90,9 +90,13 @@ def ensure_valid_polys(points):
     """
     poly = Polygon(points)
     if not poly.is_valid:
+        # A zero size buffer makes the geometry valid and guarantees to
+        # return a polygon / MultiPolygon
         poly = poly.buffer(0)
         if poly.geom_type == "MultiPolygon":
-            poly = max(poly.geoms, key=lambda p: p.area) # see if it is better to union them
+            # select the largest polygon as this will be the one that best covers the object of
+            # interest
+            poly = max(poly.geoms, key=lambda p: p.area)
 
     poly = poly.simplify(0.5, preserve_topology=True)
 
