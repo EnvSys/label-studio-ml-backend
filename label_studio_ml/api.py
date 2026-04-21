@@ -96,7 +96,8 @@ def _setup():
     project_id = data.get('project').split('.', 1)[0]
     label_config = data.get('schema')
     extra_params = data.get('extra_params')
-    model = MODEL_CLASS(project_id=project_id, label_config=label_config)
+    model = MODEL_CLASS(project_id=project_id,
+                        label_config=label_config)
 
     if extra_params:
         model.set_extra_params(extra_params)

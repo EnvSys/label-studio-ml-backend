@@ -90,8 +90,9 @@ def ensure_valid_polys(points):
     """
     poly = Polygon(points)
     if not poly.is_valid:
-        # A zero size buffer makes the geometry valid and guarantees to
-        # return a polygon / MultiPolygon
+        # buffer(0) is used instead of shapely.make_valid() because it guarantees to
+        # return a polygon, whereas make_valid() may return a geometry collection
+        # which would require additional handling to extract the relevant polygon
         poly = poly.buffer(0)
         if poly.geom_type == "MultiPolygon":
             # select the largest polygon as this will be the one that best covers the object of
